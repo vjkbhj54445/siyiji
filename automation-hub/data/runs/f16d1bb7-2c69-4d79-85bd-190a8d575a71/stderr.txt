@@ -1,0 +1,1 @@
+python: can't open file '/app/scripts/scripts/fetch_rss.py': [Errno 2] No such file or directory

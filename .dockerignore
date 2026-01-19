@@ -1,0 +1,47 @@
+# 代码版本控制
+.git
+.gitignore
+.gitattributes
+
+# IDE配置
+.vscode/
+.idea/
+*.sublime-project
+
+# Python缓存与构建产物
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+dist/
+*.egg-info/
+
+# 本地环境与敏感信息
+.env
+.env.*
+*.env
+.env.local
+.env.*.local
+
+# 本地数据与测试输出
+data/
+*.log
+*.tmp
+
+# 冲突文件（根据项目历史）
+*_冲突文件_Administrator_*.py
+
+# 开发依赖
+requirements-dev.txt
+requirements-test.txt
+
+# 文档源文件
+docs/*.md
+docs/api.md
+
+# 临时文件
+.DS_Store
+Thumbs.db
+*.swp
+*~

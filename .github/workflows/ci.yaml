@@ -1,0 +1,92 @@
+name: CI Pipeline with kind
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker image
+      run: |
+        docker build -t automation-hub:latest -f automation-hub/Dockerfile automation-hub
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+    - name: Install kind
+      run: |
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/
+
+    - name: Install Helm
+      run: |
+        curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+
+    - name: Create kind cluster
+      run: |
+        kind create cluster --name automation-hub-ci --config - <<EOF
+        kind: Cluster
+        apiVersion: kind.x-k8s.io/v1alpha4
+        nodes:
+        - role: control-plane
+          kubeadmConfigPatches:
+          - |
+            kind: InitConfiguration
+            nodeRegistration:
+              kubeletExtraArgs:
+                node-labels: "ingress-ready=true"
+          extraPortMappings:
+          - containerPort: 80
+            hostPort: 80
+            protocol: TCP
+          - containerPort: 443
+            hostPort: 443
+            protocol: TCP
+          - containerPort: 30000
+            hostPort: 30000
+            protocol: TCP
+        EOF
+
+    - name: Load Docker image into kind
+      run: |
+        kind load docker-image automation-hub:latest --name automation-hub-ci
+
+    - name: Deploy to kind via Helm
+      run: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm dependency update charts/automation-hub
+        helm upgrade --install automation-hub-ci charts/automation-hub \
+          --namespace automation-hub --create-namespace \
+          --values charts/automation-hub/values-dev.yaml
+        # Wait for deployments and cronjobs
+        kubectl wait --for=condition=available --timeout=120s \
+          deployment/automation-hub-ci --namespace automation-hub
+        kubectl wait --for=condition=complete --timeout=120s \
+          job.batch/$(kubectl get job -n automation-hub -l component=cronjob --no-headers | awk '{print $1}') --namespace automation-hub
+
+    - name: Run smoke tests
+      run: |
+        # Wait for service to be accessible
+        sleep 10
+        # Check health endpoint
+        curl -v http://localhost:30000/health
+        # Trigger a run (daily_report)
+        curl -X POST http://localhost:30000/runs/runs \
+          -H "Content-Type: application/json" \
+          -d '{"script_name":"daily_report", "parameters":{}}'

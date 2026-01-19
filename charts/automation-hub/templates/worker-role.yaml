@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "automation-hub.fullname" . }}-worker-role
+  namespace: {{ .Release.Namespace | default "automation-hub" }}
+rules:
+- apiGroups: [""]
+  resources: ["pods", "configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["{{ include "automation-hub.fullname" . }}-config-secret"]
+  verbs: ["get"]
