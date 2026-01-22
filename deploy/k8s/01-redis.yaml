@@ -1,0 +1,59 @@
+# 模块说明：Redis 部署与服务。
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: automation-hub
+  labels:
+    app: automation-hub
+    component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: automation-hub
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: automation-hub
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: automation-hub
+  labels:
+    app: automation-hub
+    component: redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app: automation-hub
+    component: redis

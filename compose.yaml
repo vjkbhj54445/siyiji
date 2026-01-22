@@ -1,8 +1,10 @@
+# 模块说明：Docker Compose 生产配置。
+
 services:
   image:
     image: image
     build:
-      context: automation-hub
+      context: .
       dockerfile: Dockerfile
     ports:
       - 8000:8000

@@ -1,0 +1,25 @@
+# 模块说明：Argo CD Application 清单。
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: automation-hub
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/your-repo/automation-hub.git'
+    targetRevision: HEAD
+    path: charts/automation-hub
+    helm:
+      valueFiles:
+        - values-prod.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: automation-hub
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

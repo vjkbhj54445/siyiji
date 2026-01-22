@@ -1,0 +1,58 @@
+# 模块说明：Worker Deployment。
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: automation-hub
+  labels:
+    app: automation-hub
+    component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: automation-hub
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: automation-hub
+        component: worker
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: worker
+          securityContext:
+            runAsUser: 10001
+            runAsNonRoot: true
+          image: automation-hub:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "worker.worker"]
+          envFrom:
+            - configMapRef:
+                name: automation-hub-config
+            - secretRef:
+                name: automation-hub-secret
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: workspace
+              mountPath: /workspace
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: automation-hub-data
+        - name: workspace
+          emptyDir: {}

@@ -1,0 +1,38 @@
+# 模块说明：Helm 模板 - NetworkPolicy。
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "automation-hub.fullname" . }}-worker-networkpolicy
+  namespace: {{ .Release.Namespace | default "automation-hub" }}
+spec:
+  podSelector:
+    matchLabels:
+      app: automation-hub
+      component: worker
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .Release.Namespace | default "automation-hub" }}
+      podSelector:
+        matchLabels:
+          app: automation-hub
+          component: api
+    ports:
+    - protocol: TCP
+      port: 8000
+  # 允许DNS查询
+  - ports:
+    - protocol: UDP
+      port: 53
+  # 允许特定外部端点（如RSS）
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: external
+      podSelector:
+        matchLabels:
+          service: rss-fetcher

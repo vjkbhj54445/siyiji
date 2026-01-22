@@ -1,4 +1,37 @@
-# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
-fastapi[all]==0.109.0
-uvicorn[standard]==0.27.0
-gunicorn==21.2.0
+# ==================== 核心依赖 ====================
+# FastAPI & Web 框架
+fastapi==0.105.0
+uvicorn[standard]==0.24.0
+pydantic==1.10.13
+jsonschema==4.20.0
+
+# 任务队列
+redis==5.0.8
+rq==1.16.2
+
+# 工具
+python-dotenv==1.0.1
+feedparser==6.0.11
+requests==2.32.3
+prometheus_client==0.20.0
+
+# ==================== 新增功能依赖 ====================
+# 定时任务系统
+apscheduler==3.10.4
+
+# Web UI
+streamlit==1.29.0
+pandas==2.1.4
+
+# 配置管理
+pyyaml==6.0.1
+
+# 文件监控
+watchdog==3.0.0
+
+# CLI工具增强
+click>=8.1.0
+rich>=13.0.0
+
+# 测试
+pytest==7.4.4

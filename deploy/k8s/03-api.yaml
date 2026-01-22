@@ -1,0 +1,95 @@
+# 模块说明：API Deployment 与 Service。
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: automation-hub
+  labels:
+    app: automation-hub
+    component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: automation-hub
+      component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: automation-hub
+        component: api
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: api
+          securityContext:
+            runAsUser: 10001
+            runAsNonRoot: true
+          image: automation-hub:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: automation-hub-config
+            - secretRef:
+                name: automation-hub-secret
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: workspace
+              mountPath: /workspace
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: automation-hub-data
+        - name: workspace
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: automation-hub
+  labels:
+    app: automation-hub
+    component: api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+  selector:
+    app: automation-hub
+    component: api

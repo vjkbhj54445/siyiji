@@ -1,0 +1,39 @@
+# 模块说明：Helm 模板 - Worker Deployment。
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "automation-hub.fullname" . }}-worker
+  namespace: {{ .Release.Namespace | default "automation-hub" }}
+  labels:
+    {{- include "automation-hub.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      app: automation-hub
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: automation-hub
+        component: worker
+    spec:
+      serviceAccountName: {{ include "automation-hub.fullname" . }}-worker-sa
+      containers:
+      - name: worker
+        image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+        env:
+        - name: DATABASE_PATH
+          value: {{ .Values.worker.env.DATABASE_PATH }}
+        - name: WORKSPACE_PATH
+          value: {{ .Values.worker.env.WORKSPACE_PATH }}
+        resources:
+          {{- toYaml .Values.worker.resources | nindent 10 }}
+      nodeSelector:
+        {{- toYaml .Values.worker.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.worker.tolerations | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.worker.affinity | nindent 8 }}

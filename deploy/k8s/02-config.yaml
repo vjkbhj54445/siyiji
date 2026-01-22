@@ -1,0 +1,16 @@
+# 模块说明：运行时配置（ConfigMap）。
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: automation-hub-config
+  namespace: automation-hub
+data:
+  DATA_DIR: /data
+  DATABASE_PATH: /data/automation_hub.sqlite3
+  RUNS_DIR: /data/runs
+  LOGS_DIR: /data/logs
+  WORKSPACE_DIR: /workspace
+  REDIS_URL: redis://redis:6379/0
+  QUEUE_NAME: default
+  API_BASE_URL: http://api:8000

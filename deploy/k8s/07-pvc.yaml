@@ -1,0 +1,13 @@
+# 模块说明：持久卷声明（PVC）。
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: automation-hub-data
+  namespace: automation-hub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

@@ -1,0 +1,97 @@
+# 模块说明：定时任务（CronJobs）。
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-report
+  namespace: automation-hub
+spec:
+  schedule: "0 9 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: automation-hub
+            component: cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: daily-report
+              image: curlimages/curl:8.6.0
+              envFrom:
+                - configMapRef:
+                    name: automation-hub-config
+              command: ["sh", "-c"]
+              args:
+                - |
+                  curl -s -X POST "${API_BASE_URL}/runs" \
+                    -H "Content-Type: application/json" \
+                    -d '{"script_name":"daily_report.py","parameters":{}}'
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-notes
+  namespace: automation-hub
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: automation-hub
+            component: cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup-notes
+              image: curlimages/curl:8.6.0
+              envFrom:
+                - configMapRef:
+                    name: automation-hub-config
+              command: ["sh", "-c"]
+              args:
+                - |
+                  curl -s -X POST "${API_BASE_URL}/runs" \
+                    -H "Content-Type: application/json" \
+                    -d '{"script_name":"backup_notes.py","parameters":{"source":"/data/notes","out_dir":"/data/backups"}}'
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: fetch-rss
+  namespace: automation-hub
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: automation-hub
+            component: cronjob
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: fetch-rss
+              image: curlimages/curl:8.6.0
+              envFrom:
+                - configMapRef:
+                    name: automation-hub-config
+              command: ["sh", "-c"]
+              args:
+                - |
+                  curl -s -X POST "${API_BASE_URL}/runs" \
+                    -H "Content-Type: application/json" \
+                    -d '{"script_name":"fetch_rss.py","parameters":{"url":"https://www.people.com.cn/rss/politics.xml","limit":10,"out_dir":"/data/rss"}}'

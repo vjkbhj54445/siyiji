@@ -1,0 +1,6 @@
+# 模块说明：Helm 模板 - Namespace。
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace | default "automation-hub" }}

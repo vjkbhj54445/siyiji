@@ -1,0 +1,23 @@
+# 模块说明：Helm 开发环境 values。
+
+replicaCount: 1
+
+image:
+  repository: automation-hub
+  tag: latest
+  pullPolicy: Always
+
+type: NodePort
+port: 8000
+nodePort: 30000
+
+env:
+  DATABASE_PATH: /data/automation_hub.sqlite3
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"

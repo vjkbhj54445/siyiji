@@ -1,0 +1,70 @@
+# 模块说明：Helm 默认 values。
+
+replicaCount: 1
+
+image:
+  repository: automation-hub
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+type: NodePort
+port: 8000
+nodePort: 30000
+
+resources: {}
+
+env:
+  DATABASE_PATH: /data/automation_hub.sqlite3
+
+# Additional environment variables
+extraEnv: []
+
+# Affinity for pod assignment
+affinity: {}
+
+# Tolerations for pod assignment
+tolerations: []
+
+# Node labels for pod assignment
+nodeSelector: {}
+
+worker:
+  replicaCount: 1
+  image:
+    repository: automation-hub-worker
+    pullPolicy: IfNotPresent
+    tag: ""
+  serviceAccount:
+    create: true
+    name: ""
+  resources: {}
+  env:
+    DATABASE_PATH: /data/automation_hub.sqlite3
+    WORKSPACE_PATH: /workspace
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+cronjobs:
+  dailyReport:
+    enabled: true
+    schedule: "0 9 * * *"
+    historyLimit: 3
+  rssFetch:
+    enabled: true
+    schedule: "*/30 * * * *"
+    historyLimit: 1

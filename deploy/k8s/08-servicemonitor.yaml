@@ -1,0 +1,21 @@
+# 模块说明：ServiceMonitor（可选）。
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: automation-hub-api
+  namespace: automation-hub
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: automation-hub
+      component: api
+  namespaceSelector:
+    matchNames:
+      - automation-hub
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

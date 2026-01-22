@@ -1,14 +1,15 @@
-# 代码版本控制
+# 模块说明：应用 Docker 构建忽略清单。
+# 版本控制
 .git
 .gitignore
 .gitattributes
 
-# IDE配置
+# IDE
 .vscode/
 .idea/
 *.sublime-project
 
-# Python缓存与构建产物
+# Python 缓存与构建产物
 __pycache__/
 *.pyc
 *.pyo
@@ -29,18 +30,8 @@ data/
 *.log
 *.tmp
 
-# 冲突文件（根据项目历史）
-*_冲突文件_Administrator_*.py
-
-# 开发依赖
-requirements-dev.txt
-requirements-test.txt
-
-# 文档源文件
-docs/*.md
-docs/api.md
-
-# 临时文件
+# 文档与临时文件
+docs/
 .DS_Store
 Thumbs.db
 *.swp

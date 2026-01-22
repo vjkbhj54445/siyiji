@@ -1,3 +1,5 @@
+# 模块说明：Docker Compose 调试配置。
+
 services:
   image:
     image: image
